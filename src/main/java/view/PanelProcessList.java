@@ -57,4 +57,7 @@ public class PanelProcessList extends JPanel {
     public void clean(){
         panelList.removeAll();
     }
+    public void rePaintList(){
+        panelList.repaint();
+    }
 }

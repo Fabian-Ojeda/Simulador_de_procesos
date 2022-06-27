@@ -116,4 +116,14 @@ public class MainView extends JFrame {
     public void rePaintBloqued(){
         panelProcessBloqued.rePaintBloqued();
     }
+    public void rePaintList(){
+        panelProcessList.rePaintList();
+    }
+
+    public String getTime(){
+        if(seconds<10){
+            return minutes+":0"+seconds;
+        }
+        return minutes+":"+seconds;
+    }
 }

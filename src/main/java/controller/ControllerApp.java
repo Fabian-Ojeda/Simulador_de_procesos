@@ -21,6 +21,7 @@ public class ControllerApp implements ActionListener {
     }
 
     private void initSimulation(int numberProcess, int quantum){
+        interfaceParameters.setVisible(false);
         mainView=new MainView(this);
         scheduler = new Scheduler(mainView, quantum);
 

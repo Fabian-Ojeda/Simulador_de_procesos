@@ -138,7 +138,7 @@ public class InterfaceParameters extends JFrame {
         buttonAccept.addActionListener(controllerApp);
         panelButton.add(buttonAccept, BorderLayout.CENTER);
         mainPanel.add(panelButton);
-        
+
         this.add(mainPanel, BorderLayout.CENTER);
     }
 

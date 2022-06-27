@@ -2,11 +2,13 @@ package model;
 
 import view.MainView;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class Scheduler  extends Thread{
 
     private Cronometer cronometer;
+    private Reporter reporter;
     private int quantum;
     private int iteratorProcessCreated;
     private MyProcess actualProcess;
@@ -21,6 +23,7 @@ public class Scheduler  extends Thread{
     private boolean indicatorDemon;
 
     public Scheduler(MainView mainView, int quantum) {
+        reporter=new Reporter();
         indicatorMainThead = true;
         indicatorReducer = true;
         indicatorDemon = true;
@@ -34,7 +37,7 @@ public class Scheduler  extends Thread{
         iteratorProcessCreated = 1;
         arrayProcessList = new ArrayList<>();
         arrayProcessBlock = new ArrayList<>();
-        MyProcess p = new MyProcess("Proceso bandera", 10, 5);
+        MyProcess p = new MyProcess("Proceso bandera", 10, 5, reporter);
         arrayProcessList.add(p);
         executeProcess();
         analizeIO();
@@ -44,7 +47,7 @@ public class Scheduler  extends Thread{
     public void createProcess(){
         int timeLife = (int) (Math.random()*19)+15;
         int nextIO = (int) (Math.random()*5)+1;
-        MyProcess p = new MyProcess("Proceso "+iteratorProcessCreated, timeLife, nextIO);
+        MyProcess p = new MyProcess("Proceso "+iteratorProcessCreated, timeLife, nextIO, reporter);
         if (actualProcess==null){
             actualProcess=p;
         }else {
@@ -59,7 +62,8 @@ public class Scheduler  extends Thread{
 
     @Override
     public void run() {
-
+        reporter.addSentence("Ejecución "+execution+" --------------------------------------------------");
+        reporter.addSentence("Proceso actual: "+actualProcess.getName());
         mainView.setActualProcess(actualProcess);
         actualProcess.analizeDependingIO();
         while (indicatorMainThead){
@@ -77,21 +81,26 @@ public class Scheduler  extends Thread{
     }
 
     private void endQuantum(){
+        reporter.addSentence("Ejecución "+execution+" --------------------------------------------------");
         if(actualProcess.isIoDependence()){
-            System.out.println("El proceso "+actualProcess.getName()+" pasa a bloqueado");
+            reporter.addSentence("El proceso "+actualProcess.getName()+" pasa a bloqueado");
             arrayProcessBlock.add(actualProcess);
         }else {
             arrayProcessList.add(actualProcess);
         }
         try {
             actualProcess=arrayProcessList.get(0);
+            reporter.addSentence("Proceso actual: "+actualProcess.getName());
             actualProcess.analizeDependingIO();
             searchingIO=false;
             arrayProcessList.remove(0);
             updateBoard();
         } catch (IndexOutOfBoundsException e){
-            System.out.println("se acabo la simulación");
-            stopThreads();
+            System.out.println("En endQuantum "+arrayProcessBlock.size());
+            if (arrayProcessBlock.size()==0){
+                System.out.println("se acabo la simulación");
+                stopThreads();
+            }
         }
 
     }
@@ -124,23 +133,30 @@ public class Scheduler  extends Thread{
     }
 
     private void stopAndDeleteProcess(){
-        System.out.println("el proceso "+actualProcess.getName()+" ha finalizado");
+        reporter.addSentence("el proceso "+actualProcess.getName()+" ha finalizado");
         mainView.setProcessEnded(actualProcess.getName());
         try{
             actualProcess=arrayProcessList.get(0);
             arrayProcessList.remove(0);
             updateBoard();
         }catch (IndexOutOfBoundsException e){
-            System.out.println("se acabo esta vuelta");
-            stopThreads();
+            System.out.println("En Stop and delete "+arrayProcessBlock.size());
+            if (arrayProcessBlock.size()==0){
+                System.out.println("se acabo la simulación stop and delete");
+                stopThreads();
+            }
         }
     }
 
     private void stopThreads(){
+        mainView.rePaintList();
         indicatorMainThead=false;
         indicatorReducer=false;
         indicatorDemon=false;
         cronometer.close();
+        reporter.addSentence("Tiempo de simulación: "+mainView.getTime());
+        reporter.generateReport();
+        JOptionPane.showMessageDialog(null,"La simulación ha finalizado");
     }
 
     private void analizeIO(){

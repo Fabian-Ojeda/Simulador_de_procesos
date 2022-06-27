@@ -8,14 +8,16 @@ public class MyProcess {
     private int timeLifeResting;
     private int maxIO;
     private boolean IoDependence;
+    private Reporter reporter;
 
-    public MyProcess(String name, int timeLife, int maxIO) {
+    public MyProcess(String name, int timeLife, int maxIO,Reporter reporter) {
         this.name = name;
         this.status = 'r';
         this.timeLife = timeLife;
         this.timeLifeResting = timeLife;
         this.maxIO=maxIO;
         this.IoDependence = false;
+        this.reporter=reporter;
     }
 
     public String getName() {
@@ -51,7 +53,7 @@ public class MyProcess {
             depending = (int) (Math.random() * 2) + 1;
             if (depending>1){
                 IoDependence = true;
-                System.out.println("desde el proceso: "+this.name+" dependo de una I/O");
+                reporter.addSentence("desde el proceso: "+this.name+" dependo de una I/O");
             }
         }
     }
@@ -63,9 +65,9 @@ public class MyProcess {
     public void setIO(int origin){
         this.IoDependence=false;
         if (origin==1){
-            System.out.println("desde el proceso: "+this.name+" mi I/O ha sido suplida dentro del quantum");
+            reporter.addSentence("desde el proceso: "+this.name+" mi I/O ha sido suplida dentro del quantum");
         }else {
-            System.out.println("desde el proceso: "+this.name+" mi I/O ha sido suplida por el demonio");
+            reporter.addSentence("desde el proceso: "+this.name+" mi I/O ha sido suplida por el demonio");
         }
     }
 }
